@@ -41,7 +41,7 @@ const Post = ({ post, setCurrentId }) => {
     };
 
     const Likes = () => {
-        if (likes.length > 0) {
+        if (likes?.length > 0) {
             return likes.find((like) => like === userId)
                 ? (
                     <>
@@ -69,9 +69,10 @@ const Post = ({ post, setCurrentId }) => {
 
     return (
         <StyledCard raised elevation={6} sx={{ maxWidth: 650 }}>
-            <StyledButtonBase component="span" name="test" onClick={openPost}
-            >
-                <StyledCardMedia image={post.selectedFile || 'https://user-images.githubusercontent.com/194400/49531010-48dad180-f8b1-11e8-8d89-1e61320e1d82.png'} title={post.title} sx={{ height: 69 }} />
+            <StyledButtonBase component="span" name="test" onClick={openPost}>
+                <StyledCardMedia 
+                image={post.selectedFile || 'https://user-images.githubusercontent.com/194400/49531010-48dad180-f8b1-11e8-8d89-1e61320e1d82.png'} 
+                title={post.title} sx={{ height: 69 }} />
                 <Overlay>
                     <Typography variant="h6">{post.name}</Typography>
                     <Typography variant="body2">{moment(post.createdAt).fromNow()}</Typography>

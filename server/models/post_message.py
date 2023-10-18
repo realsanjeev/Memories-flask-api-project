@@ -22,10 +22,9 @@ post_schema = {
     },
     "createdAt": {
         "type": datetime,
-        "default": datetime.utcnow
+        "default": datetime.utcnow()
     }
 }
-
 
 if __name__=="__main__":
     client = MongoClient('mongodb://localhost:27017/')
