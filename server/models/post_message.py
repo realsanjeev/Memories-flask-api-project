@@ -1,6 +1,8 @@
 from pymongo import MongoClient
 from datetime import datetime
 
+from db import client_init
+
 # define post schema
 post_schema = {
     "title": str,
@@ -27,7 +29,7 @@ post_schema = {
 }
 
 if __name__=="__main__":
-    client = MongoClient('mongodb://localhost:27017/')
+    client = client_init()
     db = client['database']
     post_message = db["PostMessage"]
 
