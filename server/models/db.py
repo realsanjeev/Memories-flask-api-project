@@ -16,7 +16,7 @@ def client_init():
         raise f"GEneral Exception: {e}"
 
 if __name__=="__main__":
-    print('******Testing Connection and ohter models in Server******')
+    print('******Testing Connection and other models in Server******')
     client = client_init()
     database_lists = client.list_database_names()
     for database in database_lists:
@@ -25,9 +25,9 @@ if __name__=="__main__":
         print("database: ", database, " collections list: ", collections_list)
         for collection_name in collections_list:
             collection = db_connect[collection_name]
-            print("*"*4, collection_name, "*"*4)
+            print("#"*4, collection_name, "#"*4)
             data = list(collection.find())
             if len(data):
-                print(f"{collection_name} has record in collection")
-    db = client["database"]
-    post_message = db["postMessage"]
+                print(f"[INFO]: {database.upper()} database \
+                      {collection_name.upper()} collection has record in collection")
+

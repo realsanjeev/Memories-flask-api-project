@@ -1,12 +1,10 @@
 from flask import Flask, request
 from flask_cors import CORS
 
-from models.db import client_init
+from models.posts import get_posts
 
 app = Flask(__name__)
 CORS(app=app)
-
-client = client_init()
 
 @app.route('/search')
 def search():
@@ -17,19 +15,16 @@ def search():
 @app.route("/")
 def home():
     return "<h1>Hello world</h1>"
-    # db = client["memories"]
-    # post_message = db["postMessage"]
+    # db = client["test"]
+    # post_message = db["postMessages"]
     # posts = list(post_message.find().sort([("_id", -1)]))
     # return str(posts)
 
 @app.route("/posts")
-    db = client["test"]
-    post_message = db["postMessage"]
-    
-    posts = list(post_message.find())
-    print("*"*43)
-    print()
-    return str(posts)
+def get_posts_route():
+    page = int(request.args.get('page', 1))
+    posts_response = get_posts(page)
+    return posts_response
 
 
 if __name__ == "__main__":
