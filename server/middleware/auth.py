@@ -1,23 +1,18 @@
-import functools
+import jwt
 
-from flask import (
-    Blueprint,
-    flash,
-    g,
-    redirect,
-    render_template,
-    request,
-    session,
-    url_for
-)
-from werkzeug.security import (
-    check_password_hash,
-    generate_password_hash
-)
+SECRET = 'test-secret-for-token-gen'
 
-bp = Blueprint('auth', __name__, url_prefix='/auth')
+def auth(request):
+    try:
+        token = request.headers.get("Authorization").split(' ')[1]
+        is_custom_token = len(token) < 500
 
-@bp.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("index"))
+        if token and is_custom_token:
+            decoded_data = jwt.decode(token, key=SECRET, algorithms=['HS256'])
+            request.userId = decoded_data.get('id')
+        else:
+            decoded_data = jwt.decode(jwt=token)
+            request.userId = decoded_data.get('sub')
+        return request
+    except Exception as e:
+        print("[ERROR]: Error occured dduring authentication")

@@ -1,6 +1,7 @@
-import re
+import re, datetime
 from flask import jsonify
 from bson import ObjectId
+from pymongo import ReturnDocument
 from .db import client_init
 
 client = client_init()
@@ -49,14 +50,14 @@ def get_posts_by_search(search_query: str, tags: str):
     '''Search post in collections'''
     try:
         title = re.compile(search_query, re.IGNORECASE)
-
+        print("*************", title)
         posts = post_messages.find({
             "$or": [
-                {"title": title},
+                {title},
                 {"tags": {"$in": tags.split(',')}}
             ]
         })
-
+        print("*****It os working normally*************")
         # Convert ObjectIDs to strings
         for post in posts:
             post["_id"] = str(post["_id"])
@@ -98,7 +99,68 @@ def like_post(request, id):
         return jsonify(post), 200
 
     except Exception as e:
-        print(e)
+        print("[ERROR]: Error occured in liking the post: ", e)
         return jsonify({"message": "Something went wrong."}), 500
 
 
+def create_post(new_post: dict):
+    try:
+        new_post['creator'] = 'user'
+        now = datetime.datetime.now()
+        new_post['createdAt'] = now
+        print("Runned normally", ")"*45)
+        print(new_post)
+        
+        result = post_messages.insert_one(new_post)
+
+        if result.acknowledged:
+            # convert ObjectId to str
+            new_post['_id'] = str(result.inserted_id)
+            return jsonify(new_post), 201
+        else:
+            return jsonify({"message": "Failed to insert data in Server"}), 500
+
+    except Exception as e:
+        print(f"[ERROR]: Exception during creation of post: {e}")
+        return jsonify({"message": "Something went wrong in creation of post"}), 409
+
+def update_post(id: str, data):
+    pass
+
+
+def delete_post(id: str):
+    try:
+        # check validity of post
+        if not ObjectId.is_valid(id):
+            return jsonify({"message": f"No post with id: {id}"}), 404
+        result = post_messages.delete_one({"_id": ObjectId(id)})
+        # see if post is deleted from the database
+        if not result.deleted_count:
+            print("[CRITICAL]: post is valid but post wanot deleted due to error in database")
+            return jsonify({"message": f"Couldnot perform delete action on post with id: {id}"}), 404
+        return jsonify({"message": "Post is succesfully deleted"}), 200
+    except Exception as e:
+        print(f"[ERROR]: Error while delete operation: {e}")
+        return jsonify({"message": "Something went wrong"}), 500
+
+
+def comment_post(id: str, comment: str):
+    try:
+        post = post_messages.find_one({"_id": ObjectId(id)})
+        if post is None:
+            return jsonify({"message": f"No post with id: {id}"}), 404
+        
+        # push the new comment in object post
+        post["c.omments"].push(comment)
+        updated_post = post_messages.find_one_and_update(
+            {"_id": ObjectId(id)},
+            {"$set": {"comments": post["comments"]}},
+            return_document=ReturnDocument.AFTER
+        )
+
+        # Conver ObjectID into str
+        updated_post["_id"] = str(updated_post["_id"])
+        return jsonify(updated_post), 200
+    except Exception as e:
+        print("[ERROR]: Error occured during Commeting the post")
+        return jsonify({"message": "Something went wrong"}), 500
