@@ -1,3 +1,8 @@
+# Memories Project
+
+The Memories project is a web application developed using Flask for the backend and React.js for the frontend. This application allows users to create, view, and manage their memories in an interactive and user-friendly way. With the seamless integration of Flask and React.js, the Memories project provides a dynamic and engaging user experience.
+
+### Allow CORS
 To allow Cross-Origin Resource Sharing (CORS) in a Flask application, you can use the `flask-cors` extension. CORS is a security feature implemented by web browsers that restricts web pages from making requests to a different domain than the one that served the web page. To enable CORS in your Flask app, follow these steps:
 
 1. Install the `flask-cors` extension using pip:
