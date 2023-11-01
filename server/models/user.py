@@ -1,6 +1,7 @@
 import jwt
 import bcrypt
 from flask import jsonify
+
 from .db import client_init
 
 SECRET = 'test-secret-for-token-gen'
@@ -39,8 +40,6 @@ def signup(data):
     password = data.get('password')
     first_name = data.get('firstName')
     last_name = data.get('lastName')
-    print('*'*32)
-    print("Listening to signup: ", data)
     try:
         # check if user email is already taken
         old_user = user_model.find_one({ "email": email })
@@ -54,8 +53,9 @@ def signup(data):
             "name": f"{first_name} {last_name}"
         }
         result = user_model.insert_one(user)
-        print("*"*43)
-        print("Let's see what result return's: ", result.__inserted_id)
+        if result is None:
+            return jsonify({"message": "Couldnot Sign up"}), 400
+
         token = jwt.encode({
                 "email": email,
                 "id":  str(result['_id']),
@@ -63,5 +63,5 @@ def signup(data):
             algorithm='HS256')
         return jsonify({"result": user, "token": token}), 201
     except Exception as e:
-        print(f"[ERROR]: Error occured: {e}")
+        print(f"[ERROR]: Error occured while signing up: {e}")
         return jsonify({"message": "Something went wrong"}), 500
