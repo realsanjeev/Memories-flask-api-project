@@ -22,12 +22,13 @@ def get_posts(page: int):
         print("total: ", total, "page: ", page)
 
         # convert object to list of record
-        posts = list(post_messages.find().limit(3).skip(start_index))
+        posts = list(post_messages.find().sort([('_id', -1)]).limit(3).skip(start_index))
         print("*"*32, len(posts))
 
         # convert ObjectId to string
         for post in posts:
             post['_id'] = str(post['_id'])
+        
         posts_response = {"data": posts, "currentPage": page, "numberOfPages": total//LIMIT}
         return jsonify(posts_response), 200
     except Exception as e:
@@ -116,10 +117,11 @@ def like_post(req, id: str):
         return jsonify({"message": "Something went wrong."}), 500
 
 
-def create_post(new_post: dict):
+def create_post(req, data: dict):
     try:
-        new_post['creator'] = 'user'
-        validated_post = validate_data(data=new_post, schema=POST_SCHEMA)
+        # post data -> post creator-> userId
+        data['creator'] = req.userId
+        validated_post = validate_data(data=data, schema=POST_SCHEMA)
         
         result = post_messages.insert_one(validated_post)
 
@@ -139,16 +141,25 @@ def update_post(id: str, updated_form):
         if not ObjectId.is_valid(id):
             return jsonify({"message": f"No post with id: {id}"}), 404
         
+        new_title = updated_form.get("title")
+        new_message = updated_form.get("message")
+        new_tags = updated_form.get('tags')
         # updated post id to ObjectId
         updated_form["_id"] = ObjectId(id)
-        updated_post = post_messages.find_one_and_update({"_id": ObjectId(id)}, updated_post, return_document=ReturnDocument.AFTER)
+        updated_post = post_messages.find_one_and_update(
+            {"_id": ObjectId(id)},
+            {"$set": {"title": new_title,
+                      "message": new_message,
+                      "tags": new_tags}},
+            return_document=ReturnDocument.AFTER
+        )
         
         # convert ObjectID to string
         updated_post["_id"] = str(updated_post["_id"])
         return jsonify(updated_post), 201
 
     except Exception as e:
-        print(f"[ERROR]: Error occured in updating the post with id: {id}")
+        print(f"[ERROR]: Error occured in updating the post: {e}")
         return jsonify({"message": "Something went wrong"}), 500
 
 
@@ -182,7 +193,7 @@ def comment_post(id: str, comment: str):
         post = validate_data(data=post, schema=POST_SCHEMA)
         # push the new comment in object post
         post["comments"].append(comment)
-        updated_post = post_messages.find_one_and_update(
+        updated_post = post_messages.find_one_and_replace(
             {"_id": ObjectId(id)},
             {"$set": {"comments": post["comments"]}},
             return_document=ReturnDocument.AFTER

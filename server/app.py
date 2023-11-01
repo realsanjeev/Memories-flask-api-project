@@ -38,7 +38,7 @@ def create_post_route():
     post_data = request.get_json()
     req = auth(request)
     if hasattr(req, "userId"):
-        return create_post(post_data)
+        return create_post(req=req, data=post_data)
     else:
         return jsonify({"message": "Authorization needed"}), 404
         
@@ -53,7 +53,7 @@ def update_post_route(id: str):
     body_data = request.get_json()
     req = auth(request)
     if hasattr(req, "userId"):
-        return update_post(id, data=body_data)
+        return update_post(id, updated_form=body_data)
     else:
         return jsonify({"message": "Authorization needed"}), 404
     
