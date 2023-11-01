@@ -1,13 +1,15 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from models.posts import (  get_posts,
-                            get_post,
-                            get_posts_by_search,
-                            create_post,
-                            delete_post,
-                            update_post,
-                            comment_post)
+from models.posts import (get_posts,
+                          get_post,
+                          get_posts_by_search,
+                          create_post,
+                          delete_post,
+                          update_post,
+                          comment_post,
+                          like_post)
+
 from models.user import signin, signup
 from middleware.auth import auth
 
@@ -68,7 +70,7 @@ def delete_post_route(id: str):
 def like_post_route(id: str):
     req = auth(request)
     if hasattr(req, "userId"):
-        return like_post_route(request, id)
+        return like_post(req, id)
     else:
         return jsonify({"message": "Authorization needed"}), 404
 

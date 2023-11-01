@@ -2,6 +2,11 @@ import re, datetime
 from flask import jsonify
 from bson import ObjectId
 from pymongo import ReturnDocument
+
+from .schema import (validate_data,
+                    insert_data,
+                    POST_SCHEMA,
+                    USER_SCHEMA)
 from .db import client_init
 
 client = client_init()
@@ -50,39 +55,43 @@ def get_posts_by_search(search_query: str, tags: str):
     '''Search post in collections'''
     try:
         title = re.compile(search_query, re.IGNORECASE)
-        print("*************", title)
-        posts = post_messages.find({
-            "$or": [
-                {title},
-                {"tags": {"$in": tags.split(',')}}
-            ]
-        })
-        print("*****It os working normally*************")
+
+        # convert returned objects into list
+        posts = list(post_messages.find({
+                "$or": [
+                    { "title": title },
+                    {"tags": {"$in": tags.split(',')}}
+                ]
+            }))
+        
         # Convert ObjectIDs to strings
         for post in posts:
             post["_id"] = str(post["_id"])
 
         return jsonify({"data": list(posts)}), 200
-
     except Exception as e:
         print("error in search", str(e))
         return jsonify({"message": str(e)}), 404
 
-def like_post(request, id):
-    '''like post from feed'''
-    print('like post: ', id)
-
+def like_post(req, id: str):
+    '''Like post from feed and update in model
+    Args:
+        req: `req.userId` get user id from auth 
+        id: `str`. Post id
+    '''
     try:
-        user_id = request.json.get('userId')  # Assuming userId is sent in the request body
-
+        user_id = req.userId
         if not user_id:
             return jsonify({"message": "Unauthenticated"}), 401
 
         if not ObjectId.is_valid(id):
             return jsonify({"message": f"No post with id: {id}"}), 404
 
-        post = post_messages.find_one({"_id": ObjectId(id)})  # Assuming post_messages is your collection
+        retrived_post = post_messages.find_one({"_id": ObjectId(id)})
 
+        # validate the post with schema. 
+        # This update the record if schema is changed
+        post = validate_data(data=retrived_post, schema=POST_SCHEMA)
         if not post:
             return jsonify({"message": f"No post with id: {id}"}), 404
 
@@ -107,16 +116,15 @@ def create_post(new_post: dict):
     try:
         new_post['creator'] = 'user'
         now = datetime.datetime.now()
-        new_post['createdAt'] = now
-        print("Runned normally", ")"*45)
-        print(new_post)
+
+        validated_post = validate_data(data=new_post, schema=POST_SCHEMA)
         
-        result = post_messages.insert_one(new_post)
+        result = post_messages.insert_one(validated_post)
 
         if result.acknowledged:
             # convert ObjectId to str
-            new_post['_id'] = str(result.inserted_id)
-            return jsonify(new_post), 201
+            validated_post['_id'] = str(result.inserted_id)
+            return jsonify(validated_post), 201
         else:
             return jsonify({"message": "Failed to insert data in Server"}), 500
 
@@ -164,3 +172,5 @@ def comment_post(id: str, comment: str):
     except Exception as e:
         print("[ERROR]: Error occured during Commeting the post")
         return jsonify({"message": "Something went wrong"}), 500
+
+

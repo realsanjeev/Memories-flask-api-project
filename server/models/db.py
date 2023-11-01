@@ -1,6 +1,12 @@
 from pymongo import MongoClient, errors
 
-def client_init():
+def client_init(localhost=False):
+    if localhost:
+        try:
+            client_init = MongoClient("localhost", 27017)
+        except Exception as err:
+            raise f"Couldnot connect to your local database: {err}"
+        return client_init
     username = 'makerking'
     password = 'makerking'
     cluster_uri = 'cluster0.xpammz2.mongodb.net/test'
@@ -9,10 +15,10 @@ def client_init():
         client = MongoClient(uri_endpoint)
         return client
     except errors.AutoReconnect as err:
-        raise f"Error occurred in Auto REconnection: {err}"
+        raise err(f"Error occurred in Auto REconnection")
     except errors.ConnectionFailure as err:
         raise f"Connection Failure: {err}"
-    except Exception as e:
+    except BaseException as e:
         raise f"GEneral Exception: {e}"
 
 if __name__=="__main__":
