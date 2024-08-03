@@ -53,3 +53,8 @@ if __name__ == '__main__':
 ```
 
 With the `flask-cors` extension configured, your Flask application should now properly handle CORS requests and allow cross-origin access to your API endpoints. Make sure to adjust the CORS configuration according to your specific needs, such as allowing specific origins and methods as required by your application.
+
+
+### Resources:
+- [MongoDB Atlas](https://cloud.mongodb.com/)
+- [Flask Documentation](https://flask.palletsprojects.com/en/3.0.x/)

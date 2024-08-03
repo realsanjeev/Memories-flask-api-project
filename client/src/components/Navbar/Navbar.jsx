@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { Button } from '@mui/material';
 import { useDispatch } from 'react-redux';
-import decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 import {
   StyledAppBar,
@@ -33,7 +33,7 @@ export default function Navbar() {
   useEffect(() => {
     const token = user?.token;
     if (token) {
-      const decodedToken = decode(token);
+      const decodedToken = jwtDecode(token);
 
       if (decodedToken.exp * 1000 < new Date().getTime()) logout();
     }

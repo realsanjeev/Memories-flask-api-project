@@ -184,25 +184,32 @@ def delete_post(id: str):
 
 
 def comment_post(id: str, comment: str):
-    '''Comment into the post'''
+    '''Add a comment to a post'''
     try:
+        # Find the post by ID
         post = post_messages.find_one({"_id": ObjectId(id)})
         if post is None:
             return jsonify({"message": f"No post with id: {id}"}), 404
-        
+
+        # Validate post data (assuming this function works correctly)
         post = validate_data(data=post, schema=POST_SCHEMA)
-        # push the new comment in object post
-        post["comments"].append(comment)
-        updated_post = post_messages.find_one_and_replace(
+
+        # Use $push to add the new comment
+        updated_post = post_messages.find_one_and_update(
             {"_id": ObjectId(id)},
-            {"$set": {"comments": post["comments"]}},
+            {"$push": {"comments": comment}},
             return_document=ReturnDocument.AFTER
         )
 
-        # Conver ObjectID into str
+        if updated_post is None:
+            return jsonify({"message": f"Failed to update post with id: {id}"}), 500
+
+        # Convert ObjectId to str for JSON response
         updated_post["_id"] = str(updated_post["_id"])
         return jsonify(updated_post), 200
+
     except Exception as err:
-        print(f"[ERROR]: Error occured during Commeting the post: {err}")
+        print("[ERROR]: Error occurred during commenting on the post")
+        print(f"[ERROR INFO]: {err}")
         return jsonify({"message": "Something went wrong"}), 500
 

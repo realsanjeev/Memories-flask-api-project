@@ -4,7 +4,7 @@ import { Button, Grid, Typography, Container } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import jwtDecode from 'jwt-decode';
+import { jwtDecode }  from 'jwt-decode';
 
 import Icon from './icon';
 import { signin, signup } from '../../actions/auth';

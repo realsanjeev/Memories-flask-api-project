@@ -77,7 +77,6 @@ def like_post_route(id: str):
 @app.route('/posts/<string:id>/commentPost', methods=["POST"])
 def comment_post_route(id: str):
     new_comment = request.json.get('value')
-    print("!"*53)
     req = auth(request)
     if hasattr(req, "userId"):
         return comment_post(id=id, comment=new_comment)
