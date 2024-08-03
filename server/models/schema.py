@@ -56,7 +56,7 @@ def insert_data(collection, data: dict, schema: dict=None):
         return data_returned
     validate_data(data, schema=schema)
     data_returned = collection.insert_one(data)
-    print("*"*43, data)
+    # print("*"*43, data)
     return data_returned
 
 # Example usage

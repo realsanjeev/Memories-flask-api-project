@@ -15,14 +15,14 @@ post_messages = db_connect['postmessages']
 
 def get_posts(page: int):
     '''Get the posts from the collection'''
-    LIMIT = 3
+    LIMIT = 6
     start_index = (page - 1) * LIMIT
     try:
         total = post_messages.count_documents({})
         print("total: ", total, "page: ", page)
 
         # convert object to list of record
-        posts = list(post_messages.find().sort([('_id', -1)]).limit(3).skip(start_index))
+        posts = list(post_messages.find().sort([('_id', -1)]).limit(LIMIT).skip(start_index))
         print("*"*32, len(posts))
 
         # convert ObjectId to string

@@ -23,7 +23,7 @@ def signin(data):
         
         # convert ObectId to string
         user["_id"] = str(user["_id"]) 
-        print("Sign in******"*45, user)
+        print(f"**[INFO]: Siging In User: `{user}`**")
         # ENCODE USER INFO and SEND to client
         token = jwt.encode({"email": user['email'], "id": user["_id"]}, SECRET, algorithm='HS256')
 
@@ -43,7 +43,7 @@ def signup(data):
     try:
         # check if user email is already taken
         old_user = user_model.find_one({ "email": email })
-        print("*"*4, old_user)
+        print("[INFO]: Checking if user already exists: ", old_user)
         if old_user:
             return jsonify({"message": "User already exists"})
         hash_password = bcrypt.hashpw(password=password.encode('utf-8'), salt=bcrypt.gensalt(12))

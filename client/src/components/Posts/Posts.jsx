@@ -12,9 +12,9 @@ const Posts = ({ setCurrentId }) => {
     
     return (
         isLoading ? <CircularProgress /> : (
-            <StyledGrid container alignItems="stretch" spacing={3}>
+            <StyledGrid container alignItems="stretch" spacing={4}>
                 {posts?.map((post) => (
-                    <Grid key={post._id} item xs={12}>
+                    <Grid key={post._id} item xs="auto" sm={4} md={4}>
                     {/* xs={12} sm={12} md={6}> */}
                         <Post post={post} setCurrentId={setCurrentId} />
                     </Grid>
