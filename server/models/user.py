@@ -1,10 +1,11 @@
+import os
 import jwt
 import bcrypt
 from flask import jsonify
 
 from .db import client_init
 
-SECRET = 'test-secret-for-token-gen'
+SECRET = os.environ.get("JWT_SECRET_KEY")
 mongo_server = client_init()
 db_connect = mongo_server['test']
 user_model = db_connect['users']

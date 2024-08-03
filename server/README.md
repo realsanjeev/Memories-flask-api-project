@@ -1,3 +1,6 @@
+## Run the
+
+
 ### Allow CORS
 To allow Cross-Origin Resource Sharing (CORS) in a Flask application, you can use the `flask-cors` extension. CORS is a security feature implemented by web browsers that restricts web pages from making requests to a different domain than the one that served the web page. To enable CORS in your Flask app, follow these steps:
 

@@ -1,3 +1,4 @@
+import os
 from pymongo import MongoClient, errors
 
 def client_init(localhost=False):
@@ -8,9 +9,9 @@ def client_init(localhost=False):
         except Exception as err:
             raise Exception(f"Could not connect to your local database: {err}")
     
-    username = 'makerking'
-    password = 'makerking'
-    cluster_uri = 'cluster0.xpammz2.mongodb.net/test'
+    username = os.environ.get("MONGODB_USERNAME")
+    password = os.environ.get("MONGODB_PASSWORD")
+    cluster_uri = os.environ.get("MONGODB_URI_ENDPOINT")
     uri_endpoint = f"mongodb+srv://{username}:{password}@{cluster_uri}"
     
     try:

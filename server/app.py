@@ -1,6 +1,9 @@
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
+# load .env file
+load_dotenv()
 from models.posts import (get_posts,
                           get_post,
                           get_posts_by_search,

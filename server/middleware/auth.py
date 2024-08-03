@@ -1,3 +1,4 @@
+import os
 import jwt
 from jwt.exceptions import (
     InvalidTokenError, 
@@ -5,7 +6,7 @@ from jwt.exceptions import (
     InvalidSignatureError
 )
 
-SECRET = 'test-secret-for-token-gen'
+SECRET = os.environ.get("JWT_SECRET_KEY")
 
 def auth(request):
     try:

@@ -1,8 +1,40 @@
 # Memories Project
 
-The Memories project is a web application developed using Flask for the backend and React.js for the frontend. This application allows users to create, view, and manage their memories in an interactive and user-friendly way. With the seamless integration of Flask and React.js, the Memories project provides a dynamic and engaging user experience.
+The Memories Project is a web application featuring a Flask backend and a React.js frontend. This application offers an intuitive interface for users to create, view, and manage their memories interactively. The integration of Flask with React.js ensures a dynamic and engaging experience.
 
+> For an alternative version with Node.js as the backend and React as the frontend, check out [this repo](https://github.com/realsanjeev/Memories-MERN-project).
 
+### Getting Started
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/realsanjeev/Memories-flask-api-project.git memories-app
+   cd memories-app
+   ```
+
+2. **Set Up the Server Environment**
+   - Rename `.env.example` to `.env` and configure it with your MongoDB Atlas cluster details.
+   ```bash
+   cd server
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   mv .env.example .env
+   ```
+
+3. **Run the Server**
+   ```bash
+   python app.py
+   ```
+
+4. **Set Up the Client**
+   - Ensure `nodejs` is installed.
+   - Obtain a `GOOGLE CLIENT ID` for Google sign-in. [Get it here](https://console.cloud.google.com/apis/credentials/).
+   ```bash
+   cd client
+   npm install
+   npm start
+   ```
 
 ## Contributing
 
