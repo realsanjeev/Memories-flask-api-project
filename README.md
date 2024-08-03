@@ -29,10 +29,14 @@ The Memories Project is a web application featuring a Flask backend and a React.
 
 4. **Set Up the Client**
    - Ensure `nodejs` is installed.
-   - Obtain a `GOOGLE CLIENT ID` for Google sign-in. [Get it here](https://console.cloud.google.com/apis/credentials/).
+   - Obtain a `GOOGLE CLIENT ID` for Google sign-in and put it in `.env` file. [Get it here](https://console.cloud.google.com/apis/credentials/). 
    ```bash
    cd client
    npm install
+   mv .env.example .env
+   ```
+5. **Run the Client**
+   ```bash
    npm start
    ```
 
