@@ -17,7 +17,8 @@ from models.user import signin, signup
 from middleware.auth import auth
 
 app = Flask(__name__)
-CORS(app=app, origins=['http://localhost:3000', 'https://localhost:3000'])
+# Allow all origins for development, or configure via env var
+CORS(app=app, resources={r"/*": {"origins": "*"}})
 
 @app.route("/")
 def home():
@@ -43,12 +44,11 @@ def create_post_route():
     if hasattr(req, "userId"):
         return create_post(req=req, data=post_data)
     else:
-        return jsonify({"message": "Authorization needed"}), 404
+        return jsonify({"message": "Authorization needed"}), 401
         
 
 @app.route('/posts/<string:id>', methods=["GET"])
 def get_post_route(id: str):
-    print("*"*21, "id: ", id)
     return get_post(id)
 
 @app.route('/posts/<string:id>', methods=['PATCH'])
@@ -58,7 +58,7 @@ def update_post_route(id: str):
     if hasattr(req, "userId"):
         return update_post(id, updated_form=body_data)
     else:
-        return jsonify({"message": "Authorization needed"}), 404
+        return jsonify({"message": "Authorization needed"}), 401
     
 
 @app.route('/posts/<string:id>', methods=["DELETE"])
@@ -67,7 +67,7 @@ def delete_post_route(id: str):
     if hasattr(req, "userId"):
         return delete_post(id=id)
     else:
-        return jsonify({"message": "Authorization needed"}), 404
+        return jsonify({"message": "Authorization needed"}), 401
 
 @app.route('/posts/<string:id>/likePost', methods=['PATCH'])
 def like_post_route(id: str):
@@ -75,7 +75,7 @@ def like_post_route(id: str):
     if hasattr(req, "userId"):
         return like_post(req, id)
     else:
-        return jsonify({"message": "Authorization needed"}), 404
+        return jsonify({"message": "Authorization needed"}), 401
 
 @app.route('/posts/<string:id>/commentPost', methods=["POST"])
 def comment_post_route(id: str):
@@ -84,7 +84,7 @@ def comment_post_route(id: str):
     if hasattr(req, "userId"):
         return comment_post(id=id, comment=new_comment)
     else:
-        return jsonify({"message": "Authorization needed"}), 404
+        return jsonify({"message": "Authorization needed"}), 401
 
 @app.route('/user/signin', methods=['POST'])
 def signin_route():

@@ -41,12 +41,25 @@ def signup(data):
     password = data.get('password')
     first_name = data.get('firstName')
     last_name = data.get('lastName')
+    
+    # Basic Validation
+    if not email or not password or not first_name or not last_name:
+        return jsonify({"message": "All fields are required"}), 400
+        
+    if len(password) < 6:
+        return jsonify({"message": "Password must be at least 6 characters long"}), 400
+        
+    import re
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_regex, email):
+        return jsonify({"message": "Invalid email format"}), 400
+
     try:
         # check if user email is already taken
         old_user = user_model.find_one({ "email": email })
         print("[INFO]: Checking if user already exists: ", old_user)
         if old_user:
-            return jsonify({"message": "User already exists"})
+            return jsonify({"message": "User already exists"}), 409
         hash_password = bcrypt.hashpw(password=password.encode('utf-8'), salt=bcrypt.gensalt(12))
         user = {
             "email": email,
@@ -54,15 +67,22 @@ def signup(data):
             "name": f"{first_name} {last_name}"
         }
         result = user_model.insert_one(user)
-        if result is None:
-            return jsonify({"message": "Couldnot Sign up"}), 400
+        if not result.acknowledged:
+            return jsonify({"message": "Could not Sign up"}), 400
 
         token = jwt.encode({
                 "email": email,
-                "id":  str(result['_id']),
+                "id":  str(result.inserted_id),
             }, key=SECRET,
             algorithm='HS256')
+        
+        # Add ID to user object for response
+        user['_id'] = str(result.inserted_id)
+        del user['password']
+        
         return jsonify({"result": user, "token": token}), 201
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print(f"[ERROR]: Error occured while signing up: {e}")
         return jsonify({"message": "Something went wrong"}), 500

@@ -29,7 +29,8 @@ def get_posts(page: int):
         for post in posts:
             post['_id'] = str(post['_id'])
         
-        posts_response = {"data": posts, "currentPage": page, "numberOfPages": total//LIMIT}
+        import math
+        posts_response = {"data": posts, "currentPage": page, "numberOfPages": math.ceil(total / LIMIT)}
         return jsonify(posts_response), 200
     except Exception as e:
         return jsonify({"message": f"Cannot found posts: {e}"}), 500
@@ -37,6 +38,9 @@ def get_posts(page: int):
 def get_post(id):
     try:
         print("getpost: ", id)
+        
+        if not ObjectId.is_valid(id):
+             return jsonify({"message": f"Invalid post id: {id}"}), 404
 
         # Assuming post_messages is your collection
         post = post_messages.find_one({"_id": ObjectId(id)})

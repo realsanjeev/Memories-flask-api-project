@@ -1,6 +1,6 @@
 import { START_LOADING, FETCH_ALL, FETCH_POST, FETCH_BY_SEARCH, CREATE, UPDATE, DELETE, LIKE, END_LOADING, COMMENT } from '../constants/actionTypes';
 
-const action = (state = { isLoading: true, posts: [] }, action) => {
+const postsReducer = (state = { isLoading: true, posts: [] }, action) => {
   switch (action.type) {
     case START_LOADING:
       return { ...state, isLoading: true };
@@ -18,13 +18,17 @@ const action = (state = { isLoading: true, posts: [] }, action) => {
     case FETCH_POST:
       return { ...state, post: action.payload.post };
     case LIKE:
-      return { ...state, posts: state.posts.map((post) => (
-        post._id === action.payload._id ? action.payload : post)) };
+      return {
+        ...state, posts: state.posts.map((post) => (
+          post._id === action.payload._id ? action.payload : post))
+      };
     case CREATE:
       return { ...state, posts: [...state.posts, action.payload] };
     case UPDATE:
-      return { ...state, posts: state.posts.map((post) => (
-        post._id === action.payload._id ? action.payload : post)) };
+      return {
+        ...state, posts: state.posts.map((post) => (
+          post._id === action.payload._id ? action.payload : post))
+      };
     case DELETE:
       return { ...state, posts: state.posts.filter((post) => post._id !== action.payload) };
     case COMMENT:
@@ -40,4 +44,4 @@ const action = (state = { isLoading: true, posts: [] }, action) => {
       return state;
   }
 };
-export default action;
+export default postsReducer;

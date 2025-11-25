@@ -21,7 +21,7 @@ POST_SCHEMA = {
     },
     "createdAt": {
         "type": datetime,
-        "default": datetime.datetime.utcnow()
+        "default": lambda: datetime.datetime.utcnow()
     }
 }
 
@@ -36,17 +36,25 @@ USER_SCHEMA = {
 def validate_data(data, schema: dict):
     for field in schema.keys():
         if field not in data:
-            if schema[field]["default"] is None:
-                raise Exception(f"Missing required field: {field}")
+            # Check if the field definition is a dict with a default value
+            field_def = schema[field]
+            if isinstance(field_def, dict) and "default" in field_def:
+                default_val = field_def["default"]
+                # If default is a callable (like lambda), call it
+                if callable(default_val):
+                    data[field] = default_val()
+                else:
+                    data[field] = default_val
             else:
-                data[field] = schema[field]["default"]
-        ## try validation type checked
-        # try:
-        #     if not isinstance(data[field], schema[field]["type"]):
-        #         # change the pot schema to get it working
-        #         raise Exception(f"Invalid data type for field: {field}")
-        # except:
-        #     pass
+                # If it's not a dict or has no default, it might be required
+                # But looking at POST_SCHEMA, simple types like 'title': str imply required?
+                # The original code assumed everything had a default or was required.
+                # Let's assume if it's not in data and has no default, it's an error unless it's a simple type definition
+                if isinstance(field_def, type):
+                     raise Exception(f"Missing required field: {field}")
+                elif isinstance(field_def, dict) and field_def.get("default") is None:
+                     raise Exception(f"Missing required field: {field}")
+                     
     return data
 
 # Insert the data into the MongoDB collection

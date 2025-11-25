@@ -1,65 +1,228 @@
-## Create React App
+# Memories - Client
+
+The frontend client for the Memories application, built with React and Redux. This application provides an intuitive interface for users to create, share, and manage their memories with features like authentication, search, pagination, and real-time comments.
+
+## Tech Stack
+
+- **React** 18.3.1 - UI library
+- **Redux** with Redux Thunk - State management
+- **Material-UI (MUI)** 5.16.1 - Component library
+- **React Router** 6.24.1 - Client-side routing
+- **Axios** - HTTP client for API requests
+- **Google OAuth** - Authentication via `@react-oauth/google`
+- **Moment.js** - Date formatting
+- **JWT Decode** - Token decoding
+
+## Features
+
+- 🔐 **User Authentication** - Sign in/sign up with Google OAuth or email/password
+- 📝 **Create & Edit Posts** - Share memories with title, message, tags, and images
+- 🔍 **Search & Filter** - Search by title or filter by tags
+- 📄 **Pagination** - Browse through memories efficiently
+- ❤️ **Like Posts** - Express appreciation for memories
+- 💬 **Comments** - Engage with posts through comments
+- 🎨 **Responsive Design** - Works seamlessly across devices
+- 🖼️ **Image Upload** - Add images to your memories (base64 encoding)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- npm or bun package manager
+- Backend server running (see [server README](../server/README.md))
+
+### Installation
+
+1. **Navigate to the client directory**
+   ```bash
+   cd client
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   bun install
+   ```
+
+3. **Configure environment variables**
+   
+   Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Update the `.env` file with your configuration:
+   ```env
+   REACT_APP_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+   REACT_APP_API_URL=http://localhost:5000
+   ```
+   
+   > **Note**: Get your Google Client ID from [Google Cloud Console](https://console.cloud.google.com/apis/credentials/)
+
+4. **Start the development server**
+   ```bash
+   npm start
+   # or
+   bun run start
+   ```
+
+The application will open at [http://localhost:3000](http://localhost:3000)
+
+## Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `REACT_APP_CLIENT_ID` | Google OAuth Client ID for authentication | `520746839658-xxx.apps.googleusercontent.com` |
+| `REACT_APP_API_URL` | Backend API base URL | `http://localhost:5000` |
+
+## Project Structure
+
 ```
-npx create-rect-app <project_name>
-cd <project_name>
-npm start
+src/
+├── actions/          # Redux action creators
+│   ├── auth.jsx      # Authentication actions
+│   └── posts.jsx     # Post-related actions
+├── api/              # API integration
+│   └── index.jsx     # Axios instance and API endpoints
+├── components/       # React components
+│   ├── Auth/         # Authentication forms
+│   ├── Form/         # Post creation/edit form
+│   ├── Home/         # Home page container
+│   ├── Navbar/       # Navigation bar
+│   ├── Pagination/   # Pagination component
+│   ├── PostDetails/  # Single post view with comments
+│   └── Posts/        # Posts list and individual post cards
+├── constants/        # Action type constants
+├── reducers/         # Redux reducers
+│   ├── auth.jsx      # Authentication state
+│   ├── posts.jsx     # Posts state
+│   └── index.jsx     # Root reducer
+├── App.jsx           # Main app component with routing
+└── index.js          # App entry point with Redux store
 ```
 
-## Solving problem of redux-thunk 
-npm install --save redux-thunk
+## Architecture
 
-## React Redux
-![Redux-Architecture](https://static.javatpoint.com/tutorial/reactjs/images/react-redux-architecture.png)
+### Redux State Management
 
-Redux is a predictable state container for JavaScript applications, commonly used with React. It follows a unidirectional data flow pattern and helps manage the application state in a centralized manner. The architecture diagram demonstrates the flow of data and actions within a Redux-powered React application.
+The application uses Redux for centralized state management with the following flow:
 
-Here are the key components and their interactions shown in the diagram:
+```
+┌─────────────────┐
+│  React          │
+│  Components     │──── Dispatch Actions ────▶
+└─────────────────┘
+                                              ┌─────────────────┐
+                                              │  Action         │
+                                              │  Creators       │
+                                              └────────┬────────┘
+                                                       │
+                                                       ▼
+                                              ┌─────────────────┐
+                                              │  Redux Thunk    │
+                                              │  (Async Logic)  │
+                                              └────────┬────────┘
+                                                       │
+                                                       ▼
+                                              ┌─────────────────┐
+                                              │  API Calls      │
+                                              │  (Axios)        │
+                                              └────────┬────────┘
+                                                       │
+                                                       ▼
+                                              ┌─────────────────┐
+                                              │  Reducers       │
+                                              │  (Update State) │
+                                              └────────┬────────┘
+                                                       │
+                                                       ▼
+┌─────────────────┐                          ┌─────────────────┐
+│  React          │◀──── Subscribe ──────────│  Redux Store    │
+│  Components     │                          └─────────────────┘
+└─────────────────┘
+```
 
-React Components: These are the UI components of your application, responsible for rendering the views and handling user interactions.
+**Key Concepts:**
+- **Actions**: Plain objects describing what happened (e.g., `FETCH_POSTS`, `CREATE_POST`)
+- **Action Creators**: Functions that create and return action objects
+- **Redux Thunk**: Middleware for handling async operations (API calls)
+- **Reducers**: Pure functions that update state based on actions
+- **Store**: Central state container that holds the application state
 
-Actions: Actions represent events or user interactions that trigger a change in the application state. They are plain JavaScript objects with a type property indicating the type of action and additional data as needed.
+## API Integration
 
-Action Creators: Action creators are functions that create and return action objects. They encapsulate the logic of creating actions with the required data.
+The client communicates with the Flask backend through Axios. All API calls are centralized in `src/api/index.jsx`:
 
-Reducers: Reducers are pure functions responsible for handling the state changes based on the dispatched actions. They take the current state and an action as input and return a new state object. Reducers should not modify the existing state; instead, they create a new state object.
+### Authentication
+- `POST /user/signin` - User sign in
+- `POST /user/signup` - User registration
 
-Store: The store is the central place that holds the application state. It is created using the createStore function provided by Redux. The store provides methods to dispatch actions, access the current state, and subscribe to state changes.
+### Posts
+- `GET /posts?page={page}` - Fetch paginated posts
+- `GET /posts/{id}` - Fetch single post
+- `GET /posts/search?searchQuery={query}&tags={tags}` - Search posts
+- `POST /posts` - Create new post
+- `PATCH /posts/{id}` - Update post
+- `DELETE /posts/{id}` - Delete post
+- `PATCH /posts/{id}/likePost` - Like/unlike post
+- `POST /posts/{id}/commentPost` - Add comment to post
 
-Middleware: Middleware sits between the dispatching of an action and the moment it reaches the reducer. It can intercept actions, modify them, or execute additional logic. Popular middleware examples include redux-thunk for handling asynchronous actions and redux-logger for logging actions and state changes.
+### Request Interceptor
 
-Store Subscription: Components can subscribe to the store to receive updates whenever the state changes. This enables components to react to state changes and update their UI accordingly.
-
-## Axios
-Breakdown of code in api/index.jsx
-
-1. `fetchPosts`: Sends a GET request to the specified `url` to fetch all posts.
+All authenticated requests automatically include the JWT token:
 
 ```javascript
-export const fetchPosts = () => axios.get(url);
+API.interceptors.request.use((req) => {
+  if (localStorage.getItem('profile')) {
+    const { token } = JSON.parse(localStorage.getItem('profile'));
+    req.headers.Authorization = `Bearer ${token}`;
+  }
+  return req;
+});
 ```
 
-2. `createPost`: Sends a POST request to the `url` with the `newPost` object as the request payload to create a new post.
+## Available Scripts
 
-```javascript
-export const createPost = (newPost) => axios.post(url, newPost);
+| Command | Description |
+|---------|-------------|
+| `npm start` | Runs the app in development mode at [http://localhost:3000](http://localhost:3000) |
+| `npm test` | Launches the test runner in interactive watch mode |
+| `npm run build` | Builds the app for production to the `build` folder |
+| `npm run eject` | **One-way operation** - Ejects from Create React App |
+
+## Troubleshooting
+
+### Babel Dependency Warning
+
+If you see a warning about `@babel/plugin-proposal-private-property-in-object`:
+
+```bash
+npm install --save-dev @babel/plugin-proposal-private-property-in-object
 ```
 
-3. `likePost`: Sends a PATCH request to the `url` with the post `id` appended to `/likePost` to like a specific post.
+This is a known issue with `create-react-app` which is no longer maintained.
 
-```javascript
-export const likePost = (id) => axios.patch(`${url}/${id}/likePost`);
-```
+### CORS Errors
 
-4. `updatePost`: Sends a PATCH request to the `url` with the post `id` appended to update a specific post with the `updatedPost` object as the request payload.
+Ensure the backend server is running and configured to allow requests from `http://localhost:3000`. The `proxy` field in `package.json` is set to `http://localhost:5000`.
 
-```javascript
-export const updatePost = (id, updatedPost) => axios.patch(`${url}/${id}`, updatedPost);
-```
+### API Connection Failed
 
-5. `deletePost`: Sends a DELETE request to the `url` with the post `id` appended to delete a specific post.
+1. Verify the backend server is running on port 5000
+2. Check `REACT_APP_API_URL` in your `.env` file
+3. Ensure MongoDB is connected (check server logs)
 
-```javascript
-export const deletePost = (id) => axios.delete(`${url}/${id}`);
-```
+### Google OAuth Not Working
 
-These functions make use of the Axios library to handle HTTP requests and interact with the server endpoints for fetching, creating, updating, and deleting posts.
+1. Verify `REACT_APP_CLIENT_ID` is correctly set in `.env`
+2. Ensure the Google Client ID is configured for `http://localhost:3000` in Google Cloud Console
+3. Check that the OAuth consent screen is properly configured
+
+## Learn More
+
+- [React Documentation](https://react.dev/)
+- [Redux Documentation](https://redux.js.org/)
+- [Material-UI Documentation](https://mui.com/)
+- [React Router Documentation](https://reactrouter.com/)

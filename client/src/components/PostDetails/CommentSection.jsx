@@ -25,40 +25,51 @@ const CommentSection = ({ post }) => {
     return (
         <div>
             <CommentsOuterContainer>
-                <CommentsInnerContainer>
-                    <Typography gutterBottom variant="h6">
-                        Comments
-                    </Typography>
-                    {comments?.map((c, i) => (
-                        <Typography key={i} gutterBottom variant="subtitle1">
-                            <strong>{c.split(": ")[0]}</strong>
-                            {c.split(":")[1]}
+                <div style={{ flex: 1, minWidth: '250px' }}>
+                    <CommentsInnerContainer>
+                        <Typography gutterBottom variant="h6">
+                            Comments
                         </Typography>
-                    ))}
-                    <div ref={commentsRef} />
-                </CommentsInnerContainer>
-                <div style={{ width: '70%' }}>
+                        {comments?.map((c, i) => (
+                            <Typography key={i} gutterBottom variant="subtitle1">
+                                <strong>{c.split(": ")[0]}</strong>
+                                {c.split(":")[1]}
+                            </Typography>
+                        ))}
+                        <div ref={commentsRef} />
+                    </CommentsInnerContainer>
+                </div>
+                <div style={{ flex: 1, minWidth: '250px' }}>
                     <Typography gutterBottom variant="h6" color="primary">Write a comment</Typography>
-                    <TextField fullWidth 
-                    rows={4}
-                    variant="outlined"
-                    label="Comment"
-                    multiline
-                    value={comment}
-                    onChange={(e) => {
-                        console.log(comment)
-                        return setComment(e.target.value)}}
-                    />
-                    <br />
-                    <Button 
-                    style={{ marginTop: '10px' }} 
-                    fullWidth 
-                    disabled={!comment.length}
-                    color='primary'
-                    variant="contained"
-                    onClick={handleComment}>
-                        Comment
-                    </Button>
+                    {!user?.result?.name ? (
+                        <Typography variant="body2" color="textSecondary">
+                            Please sign in to leave a comment.
+                        </Typography>
+                    ) : (
+                        <>
+                            <TextField fullWidth
+                                rows={4}
+                                variant="outlined"
+                                label="Comment"
+                                multiline
+                                value={comment}
+                                onChange={(e) => {
+                                    console.log(comment)
+                                    return setComment(e.target.value)
+                                }}
+                            />
+                            <br />
+                            <Button
+                                style={{ marginTop: '10px' }}
+                                fullWidth
+                                disabled={!comment.length}
+                                color='primary'
+                                variant="contained"
+                                onClick={handleComment}>
+                                Comment
+                            </Button>
+                        </>
+                    )}
                 </div>
             </CommentsOuterContainer>
         </div>
