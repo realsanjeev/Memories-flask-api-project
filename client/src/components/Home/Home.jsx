@@ -18,6 +18,7 @@ function useQuery() {
 const Home = () => {
   const [search, setSearch] = useState('');
   const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState('');
   const [currentId, setCurrentId] = useState(0);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -25,20 +26,20 @@ const Home = () => {
   const query = useQuery();
   const page = query.get('page') || 1;
   const searchQuery = query.get('searchQuery');
+  const tagsParam = query.get('tags');
 
   useEffect(() => {
-    const tags = query.get('tags');
-
-    if (searchQuery && tags) {
-      // Perform the search and update the state accordingly
+    if (searchQuery && tagsParam) {
       setSearch(searchQuery);
-      setTags(tags.split(',').map(tag => tag.trim()));
-      dispatch(getPostsBySearch({ search: searchQuery, tags }));
+      const parsedTags = tagsParam.split(',').map(tag => tag.trim());
+      setTags(parsedTags);
+      setTagInput(parsedTags.join(', '));
+      dispatch(getPostsBySearch({ search: searchQuery, tags: tagsParam }));
     }
-  }, [setSearch]);
+  }, [searchQuery, tagsParam, dispatch]);
 
   const searchPost = () => {
-    if (search.trim() || tags) {
+    if (search.trim() || tags.length) {
       dispatch(getPostsBySearch({ search, tags: tags.join(',') }));
       navigate(`/posts/search?searchQuery=${search || 'none'}&tags=${tags.join(',')}`);
     } else {
@@ -47,38 +48,36 @@ const Home = () => {
   };
 
   const handleKeyPress = (e) => {
-    if (e.keyCode === 13) {
+    if (e.key === 'Enter') {
       searchPost();
     }
   };
 
   const handleDeleteChip = (chipToDelete) => {
-    setTags(tags.filter((tag) => tag !== chipToDelete));
+    const updated = tags.filter((tag) => tag !== chipToDelete);
+    setTags(updated);
+    setTagInput(updated.join(', '));
   };
 
-  const chipDisplay = tags.map((tag) => (
-    <Chip
-      key={tag}
-      name="tags"
-      variant="outlined"
-      label={tag}
-      onDelete={() => handleDeleteChip(tag)}
-    />
-  ));
-
+  const handleTagChange = (e) => {
+    const value = e.target.value;
+    setTagInput(value);
+    setTags(value.split(',').map(tag => tag.trim()).filter(Boolean));
+  };
 
   return (
     <Grow in>
       <Container maxWidth="xl">
         <StyledGrid
           container
-          justify="space-between"
+          justifyContent="space-between"
           alignItems="stretch"
-          spacing={3}>
-          <Grid item xs={12} sm={6} md={9}>
+          spacing={3}
+        >
+          <Grid size={{ xs: 12, sm: 6, md: 9 }}>
             <Posts setCurrentId={setCurrentId} />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <PaperSearchBar elevation={6}>
               <TextField
                 onKeyDown={handleKeyPress}
@@ -89,25 +88,29 @@ const Home = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <div style={{ padding: "5px 2px", width: "94%" }}>{chipDisplay}</div>
+              <div style={{ padding: '5px 2px', width: '94%', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                {tags.map((tag) => (
+                  <Chip
+                    key={tag}
+                    variant="outlined"
+                    label={tag}
+                    onDelete={() => handleDeleteChip(tag)}
+                  />
+                ))}
+              </div>
               <TextField
                 name="tags"
                 variant="outlined"
-                label="Search Tags (coma separated)"
+                label="Search Tags (comma separated)"
                 fullWidth
-                value={tags.join(",")} // Join tags to show them as a comma-separated string
-                onChange={(e) =>
-                  setTags(e.target.value.split(",").map(tag => tag.trim()))
-
-                }
+                value={tagInput}
+                onChange={handleTagChange}
               />
               <SearchButton onClick={searchPost} variant="contained" color="primary" fullWidth>
-              Search
-            </SearchButton>
+                Search
+              </SearchButton>
             </PaperSearchBar>
             <Form currentId={currentId} setCurrentId={setCurrentId} />
-
-
             {(!searchQuery && !tags.length) && (
               <StyledPaper elevation={6}>
                 <Paginate page={page} />

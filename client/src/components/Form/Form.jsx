@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 import { TextField, Button, Typography } from "@mui/material";
 import Chip from "@mui/material/Chip";
-import FileBase from "react-file-base64";
 
 import { createPost, updatePost } from "../../actions/posts";
 import {
@@ -22,6 +21,8 @@ const Form = ({ currentId, setCurrentId }) => {
     tags: [],
     selectedFile: "",
   });
+  const [tagInput, setTagInput] = useState("");
+
   const post = useSelector((state) =>
     currentId ? state.posts.posts.find((message) => message._id === currentId) : null
   );
@@ -31,28 +32,26 @@ const Form = ({ currentId, setCurrentId }) => {
 
   const clear = () => {
     setCurrentId(0);
-    setPostData({
-      title: "",
-      message: "",
-      tags: [],
-      selectedFile: "",
-    });
+    setPostData({ title: "", message: "", tags: [], selectedFile: "" });
+    setTagInput("");
   };
 
   useEffect(() => {
     if (!post?.title) clear();
-    if (post) setPostData(post);
-  }, [post]);
+    if (post) {
+      setPostData(post);
+      setTagInput(post.tags?.join(", ") || "");
+    }
+  }, [post]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (currentId === 0) {
+    if (!currentId) {
       dispatch(createPost({ ...postData, name: user?.result?.name }, navigate));
-      clear();
     } else {
       dispatch(updatePost(currentId, { ...postData, name: user?.result?.name }));
-      clear();
     }
+    clear();
   };
 
   if (!user?.result?.name) {
@@ -66,21 +65,19 @@ const Form = ({ currentId, setCurrentId }) => {
   }
 
   const handleDeleteChip = (chipToDelete) => {
-    setPostData({
-      ...postData,
-      tags: postData.tags.filter((tag) => tag !== chipToDelete),
-    });
+    const updatedTags = postData.tags.filter((tag) => tag !== chipToDelete);
+    setPostData({ ...postData, tags: updatedTags });
+    setTagInput(updatedTags.join(", "));
   };
 
-  const chipDisplay = postData.tags.map((tag) => (
-    <Chip
-      key={tag}
-      name="tags"
-      variant="outlined"
-      label={tag}
-      onDelete={() => handleDeleteChip(tag)}
-    />
-  ));
+  const handleTagChange = (e) => {
+    const value = e.target.value;
+    setTagInput(value);
+    setPostData({
+      ...postData,
+      tags: value.split(",").map((tag) => tag.trim()).filter(Boolean),
+    });
+  };
 
   return (
     <RootContainer>
@@ -105,30 +102,40 @@ const Form = ({ currentId, setCurrentId }) => {
             multiline
             rows={4}
             value={postData.message}
-            onChange={(e) =>
-              setPostData({ ...postData, message: e.target.value })
-            }
+            onChange={(e) => setPostData({ ...postData, message: e.target.value })}
           />
-          <div style={{ padding: "5px 0", width: "94%" }}>{chipDisplay}</div>
+          <div style={{ padding: "5px 0", width: "94%", display: "flex", flexWrap: "wrap", gap: "4px" }}>
+            {postData.tags.map((tag) => (
+              <Chip
+                key={tag}
+                variant="outlined"
+                label={tag}
+                onDelete={() => handleDeleteChip(tag)}
+              />
+            ))}
+          </div>
           <TextField
             name="tags"
             variant="outlined"
-            label="Tags (coma separated)"
+            label="Tags (comma separated)" 
             fullWidth
-            value={postData.tags.join(",")} // Join tags to show them as a comma-separated string
-            onChange={(e) =>
-              setPostData({ ...postData,
-                tags: e.target.value.split(",").map(tag => tag.trim()) })
-
-            }
+            value={tagInput}              
+            onChange={handleTagChange}
           />
           <FileInput>
-            <FileBase
+            <input
               type="file"
               multiple={false}
-              onDone={({ base64 }) =>
-                setPostData({ ...postData, selectedFile: base64 })
-              }
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.readAsDataURL(file);
+                  reader.onload = () => {
+                    setPostData({ ...postData, selectedFile: reader.result });
+                  };
+                }
+              }}
             />
           </FileInput>
           <SubmitButton
